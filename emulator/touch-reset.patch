@@ -1,0 +1,12 @@
+--- a/src/DSi.cpp
++++ b/src/DSi.cpp
+@@ -715,6 +715,9 @@ void DSi::SoftReset()
+     NDS::MapSharedWRAM(3);
+ 
++    // Restore DSi touchscreen protocol after a DS-compatible title.
++    SPI.GetTSC()->Reset();
++
+     // TODO: is this actually reset?
+     I2S.Reset();
+ 
+     // TODO: does the DSP get reset? NWRAM doesn't, so I'm assuming no

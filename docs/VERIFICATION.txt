@@ -1,0 +1,35 @@
+v0.1.0 发布检查
+
+修改对象
+- NAND：主机设置的输入法和键盘资源、DSi Menu 的中文昵称显示、
+  PictoChat 启动/返回菜单兼容性，以及 boot2 ARM9 的内存映射恢复。
+- Windows melonDS 1.1 x64：DSi::SoftReset 恢复触摸控制器状态。
+- 各组件修改前后的 SHA-256 见 patches/manifest.json。
+
+本地自动检查结果（各项退出状态均为 0）
+BASELINE: original component hashes match; input opened read-only; PASS
+MODIFIED: approved components reproduced; unrelated files, profiles and footer preserved; emulator delta verified; PASS
+ROLLBACK: NAND and emulator restored byte-for-byte to new files; modified deliverables retained; PASS
+NEGATIVE: wrong version, overwrite, in-place write, rollback overwrite and corrupt patch rejected; PASS
+BUILD: touch-reset executable exactly reproduced; original unchanged; PASS
+SOURCE: upstream 1.1 patch applied and reversed byte-for-byte; PASS
+SHELL: executable ROLLBACK.sh restores original hash; PASS
+
+复现方式
+在仓库目录运行 tests/integration.py，依次选择 baseline、modified、rollback、negative。
+每次均需提供 --original 原始NAND --reference 已验证的修改版NAND
+--emulator 原始melonDS.exe；可用 --work 指定一个新的本地输出目录。
+这些输入不随仓库提供。modified 模式测试另一个有效个人资料的副本，
+但仍使用同一设备的原始镜像，不代表已经完成跨设备测试。
+
+回滚检查生成另外的文件，与各自原始输入逐字节一致；修改版保留不变。
+模拟器回滚后恢复原版代码，触摸复位补丁也随之移除。
+
+界面验证与自动检查的区别
+此前已在配套 Windows 测试环境中确认昵称/签名输入保存、菜单中文昵称、
+PictoChat 返回菜单后的触摸和按键。本次发布工具生成的目标组件与该版本一致。
+自动检查不等于重新完成所有界面测试，也不代表其他设备、Android 或真机已验证。
+
+发布内容
+仅包含组件差分、工具、输入法参考代码及文档。
+不包含完整 NAND、BIOS、模拟器 exe、个人资料或本地 undo 回滚数据。

@@ -1,0 +1,9 @@
+*.bin
+*.nds
+*.exe
+*.apk
+*.undo.zip
+__pycache__/
+.venv/
+/dist/
+/local-tests/

@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "version": "0.1.0",
+  "target": "iQue DSi Chinese system components; emulator use",
+  "nand": [
+    {
+      "name": "settings",
+      "before_sha256": "0ed08758f51db92190e618cccf092165e61d6ea4329c9d92b181ff70cd6c041a",
+      "after_sha256": "ccc67266d582a7ee9b5a86d203c20597f7f2b5cfa9743741c2d87ab2d8c26d57",
+      "before_size": 2100224,
+      "after_size": 4499680,
+      "patch": "patches/settings.bsdiff",
+      "patch_sha256": "f07d392aaa0b6c80e2e2fe1b66bb48255eca952f2a9fc9b1bcf2ff17cf68a1b7",
+      "kind": "file",
+      "path": "/title/00030015/484e4243/content/00000001.app"
+    },
+    {
+      "name": "menu",
+      "before_sha256": "dd0571b9e859cb8bc66ff8c1837767a66fb4b49e5b8a89152db2d8a65354a5f8",
+      "after_sha256": "e3b9d4d75ec59a7276afdfdf13cee63486421a8ca05836453811bf66ec6370b7",
+      "before_size": 2087936,
+      "after_size": 2087936,
+      "patch": "patches/menu.bsdiff",
+      "patch_sha256": "958919ad7909bf31b09ed69b1bc07b672f456db1f3b3e52d2d9845b09c77b689",
+      "kind": "file",
+      "path": "/title/00030017/484e4143/content/00000005.app"
+    },
+    {
+      "name": "pictochat",
+      "before_sha256": "919c1a3fdabd45c21c133647aa0629aa9f5b5cd3f7bdec72a0fd477071431399",
+      "after_sha256": "331600c4268a56ce39c2d1ffc30086cae97feb9a28645656e9ca2bb7a8beb4da",
+      "before_size": 628160,
+      "after_size": 628672,
+      "patch": "patches/pictochat.bsdiff",
+      "patch_sha256": "a31a6a72c952da224340d4f4dfd6dda0aee135ab799ab5628c51817c99d3cbab",
+      "kind": "file",
+      "path": "/title/00030005/484e4543/content/00000000.app"
+    },
+    {
+      "name": "boot2-arm9",
+      "before_sha256": "47b7e7e2445ed6b1001f79696265d2a6e4ae3f88a6965c4fb415e06c6cb4e62d",
+      "after_sha256": "2b4cdcdb9213f6f6795c2102ddccbccb603d79b18c51896e5e244c145d4eae9e",
+      "before_size": 157184,
+      "after_size": 157184,
+      "patch": "patches/boot2-arm9.bsdiff",
+      "patch_sha256": "055a3c373dc421ac2b1b3a667cd421da302b4a12160ebf9e048171dd1f55cc4e",
+      "kind": "boot2",
+      "parameters": [
+        2048,
+        156688,
+        58425344,
+        157184
+      ]
+    }
+  ],
+  "emulator": {
+    "name": "melonds-1.1-windows-x64-touch-reset",
+    "before_sha256": "04738277ba1d7ea0b7408608755d746193a68a9bfa628e2759140a9f2d5ab109",
+    "after_sha256": "b4dc25f7a43ce9a7a132095012bc775494e215e7b2226eb5f01f7d0903d7eea6",
+    "before_size": 43520000,
+    "after_size": 43520000,
+    "patch": "patches/melonds-1.1-windows-x64-touch-reset.bsdiff",
+    "patch_sha256": "5bd79744cce9efa353ca19ca6608ae90f298bfe7f75e0c4e44a9b3cf9bea47a9"
+  },
+  "privacy": "No full NAND, BIOS, footer, settings, saves, or local undo data included"
+}
