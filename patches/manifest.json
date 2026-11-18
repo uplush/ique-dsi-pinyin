@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "target": "iQue DSi Chinese system components; emulator use",
   "nand": [
     {
@@ -51,6 +51,17 @@
         58425344,
         157184
       ]
+    },
+    {
+      "name": "sound",
+      "before_sha256": "9c6e6384c4f07e1442f2961c3b201dca0bc7494019ccbb37487d3852e299cfbf",
+      "after_sha256": "ab33586b7b31e81980e06dec29bd87fc8b23f6d950dbea581586ccc5907dd4b1",
+      "before_size": 4681728,
+      "after_size": 4681728,
+      "patch": "patches/sound.bsdiff",
+      "patch_sha256": "8aa71fe073e752a2a91b94fc5ce4e9a429caead87d355ba1b357193e1dc7e50b",
+      "kind": "file",
+      "path": "/title/00030005/484e4b43/content/00000000.app"
     }
   ],
   "emulator": {
@@ -62,5 +73,11 @@
     "patch": "patches/melonds-1.1-windows-x64-touch-reset.bsdiff",
     "patch_sha256": "5bd79744cce9efa353ca19ca6608ae90f298bfe7f75e0c4e44a9b3cf9bea47a9"
   },
-  "privacy": "No full NAND, BIOS, footer, settings, saves, or local undo data included"
+  "privacy": "No full NAND, BIOS, footer, settings, saves, or local undo data included",
+  "upgrade": {
+    "from_version": "0.1.0",
+    "components": [
+      "sound"
+    ]
+  }
 }

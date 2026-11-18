@@ -18,6 +18,7 @@ FILES = [
     ('settings', '/title/00030015/484e4243/content/00000001.app'),
     ('menu', '/title/00030017/484e4143/content/00000005.app'),
     ('pictochat', '/title/00030005/484e4543/content/00000000.app'),
+    ('sound', '/title/00030005/484e4b43/content/00000000.app'),
 ]
 
 
@@ -60,8 +61,9 @@ def main():
         b.close()
     emulator = delta('melonds-1.1-windows-x64-touch-reset', args.original_emulator.read_bytes(),
                      args.modified_emulator.read_bytes())
-    data = dict(format=1, version='0.1.0', target='iQue DSi Chinese system components; emulator use',
+    data = dict(format=1, version='0.1.1', target='iQue DSi Chinese system components; emulator use',
                 nand=items, emulator=emulator,
+                upgrade={'from_version': '0.1.0', 'components': ['sound']},
                 privacy='No full NAND, BIOS, footer, settings, saves, or local undo data included')
     (ROOT / 'patches/manifest.json').write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
     print('BUILD: component deltas only; all roundtrips PASS')

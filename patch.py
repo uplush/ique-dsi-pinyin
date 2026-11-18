@@ -64,16 +64,30 @@ def boot_data(nand, item):
     return boot_crypt(nand.f.read(parameters[3]))
 
 
-def check_nand(path, patched=False):
+def check_components(n, patched=False, upgrade=False):
+    require(not (patched and upgrade), 'Conflicting verification modes')
+    info = manifest()
+    upgrade_names = set(info.get('upgrade', {}).get('components', []))
+    if upgrade:
+        require(bool(upgrade_names), 'This release has no upgrade path')
+        require(upgrade_names <= {item['name'] for item in info['nand']}, 'Invalid upgrade manifest')
+    for item in info['nand']:
+        # Upgrade accepts the previous release's components plus the original Sound app.
+        key = 'after_sha256' if patched or (upgrade and item['name'] not in upgrade_names) else 'before_sha256'
+        data = boot_data(n, item) if item['kind'] == 'boot2' else n.file(item['path'])
+        require(digest(data) == item[key], 'Component version mismatch: ' + item['name'])
+
+
+def check_nand(path, patched=False, upgrade=False):
     n = NAND(path)
     try:
-        key = 'after_sha256' if patched else 'before_sha256'
-        for item in manifest()['nand']:
-            data = boot_data(n, item) if item['kind'] == 'boot2' else n.file(item['path'])
-            require(digest(data) == item[key], 'Component version mismatch: ' + item['name'])
+        check_components(n, patched, upgrade)
     finally:
         n.close()
-    print('VERIFY: patched components match; PASS' if patched else 'CHECK: supported original components; PASS')
+    if upgrade:
+        print('CHECK: supported previous-release components; Sound upgrade available; PASS')
+    else:
+        print('VERIFY: patched components match; PASS' if patched else 'CHECK: supported original components; PASS')
 
 
 def write_copy(source, output, sectors, validator=None):
@@ -109,9 +123,10 @@ def write_copy(source, output, sectors, validator=None):
     print('APPLY: output verified; original unchanged; undo archive created; PASS')
 
 
-def apply_nand(source, output):
+def apply_nand(source, output, upgrade=False):
     n = NAND(source)
     try:
+        check_components(n, upgrade=upgrade)
         writer = Writer(n)
         fat = bytearray(n.fat)
         for i in range(n.nfats):
@@ -125,7 +140,10 @@ def apply_nand(source, output):
         raw_sectors = {}
         changed_files = set()
         # Preflight every component before creating any output file.
-        for item in manifest()['nand']:
+        info = manifest()
+        for item in info['nand']:
+            if upgrade and item['name'] not in info['upgrade']['components']:
+                continue
             if item['kind'] == 'boot2':
                 before = boot_data(n, item)
                 after = boot_crypt(transform(before, item))
@@ -134,7 +152,11 @@ def apply_nand(source, output):
                     raw_sectors[offset + pos] = after[pos:pos + 512]
             else:
                 path = item['path']
-                writer.put_file(path, transform(n.file(path), item), fat, used)
+                data = transform(n.file(path), item)
+                if len(data) == n.entries[path]['size']:
+                    writer.replace_file(path, data)
+                else:
+                    writer.put_file(path, data, fat, used)
                 changed_files.add(path)
         for i in range(n.nfats):
             writer.write_plain(n.fataddr + i * len(fat), fat)
@@ -198,10 +220,10 @@ def main():
     require(__debug__, 'Run Python without -O; input validation must remain enabled')
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
-    for name in ('check', 'verify'):
+    for name in ('check', 'check-upgrade', 'verify'):
         p = sub.add_parser(name)
         p.add_argument('input', type=Path)
-    for name in ('apply', 'emulator'):
+    for name in ('apply', 'upgrade', 'emulator'):
         p = sub.add_parser(name)
         p.add_argument('input', type=Path)
         p.add_argument('output', type=Path)
@@ -210,10 +232,10 @@ def main():
     p.add_argument('undo', type=Path)
     p.add_argument('output', type=Path)
     args = parser.parse_args()
-    if args.command in ('check', 'verify'):
-        check_nand(args.input, args.command == 'verify')
-    elif args.command == 'apply':
-        apply_nand(args.input, args.output)
+    if args.command in ('check', 'check-upgrade', 'verify'):
+        check_nand(args.input, patched=args.command == 'verify', upgrade=args.command == 'check-upgrade')
+    elif args.command in ('apply', 'upgrade'):
+        apply_nand(args.input, args.output, upgrade=args.command == 'upgrade')
     elif args.command == 'emulator':
         apply_emulator(args.input, args.output)
     else:

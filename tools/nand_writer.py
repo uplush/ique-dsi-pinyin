@@ -20,6 +20,14 @@ class Writer:
             if short.lower()==name:found.append(self.n.dataaddr+(chain[off//self.n.cluster_size]-2)*self.n.cluster_size+off%self.n.cluster_size)
         assert len(found)==1,(path,found)
         return found[0]
+    def replace_file(self, path, data):
+        """Replace an equal-sized file without changing its allocation or slack."""
+        assert len(data) == self.n.entries[path]['size'], 'replacement size differs'
+        for i, cluster in enumerate(self.n.clusters(self.n.entries[path]['cluster'])):
+            chunk = data[i*self.n.cluster_size:(i+1)*self.n.cluster_size]
+            if not chunk:
+                break
+            self.write_plain(self.n.dataaddr+(cluster-2)*self.n.cluster_size, chunk)
     def put_file(self,path,data,fat,used):
         old=list(self.n.clusters(self.n.entries[path]['cluster']));chain=old[:]
         need=(len(data)+self.n.cluster_size-1)//self.n.cluster_size

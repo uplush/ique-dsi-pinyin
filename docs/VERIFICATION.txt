@@ -1,8 +1,10 @@
-v0.1.0 发布检查
+v0.1.1 发布检查
 
 修改对象
 - NAND：主机设置的输入法和键盘资源、DSi Menu 的中文昵称显示、
   PictoChat 启动/返回菜单兼容性，以及 boot2 ARM9 的内存映射恢复。
+- v0.1.1 新增：趣音 HNKC 输入线程声音更新的空对象检查。
+  0x0201133c 的 64 字节函数原位替换；对象为空时跳过本次更新，就绪后保留原分派。
 - Windows melonDS 1.1 x64：DSi::SoftReset 恢复触摸控制器状态。
 - 各组件修改前后的 SHA-256 见 patches/manifest.json。
 
@@ -15,12 +17,29 @@ BUILD: touch-reset executable exactly reproduced; original unchanged; PASS
 SOURCE: upstream 1.1 patch applied and reversed byte-for-byte; PASS
 SHELL: executable ROLLBACK.sh restores original hash; PASS
 
+v0.1.1 新增检查（各项退出状态均为 0）
+UPGRADE: only Sound file sectors changed (4); existing apps, profiles, allocation, slack and footer preserved; PASS
+ROLLBACK: previous-release NAND restored byte-for-byte; upgraded copy retained; PASS
+NEGATIVE: original, repeated upgrade, overwrite, in-place write, mismatched components and corrupt delta rejected before output; PASS
+两个旧版输入均通过：此前运行过的测试副本，以及 v0.1.0 发布工具生成的副本。
+完整安装另测了不同个人资料的原始镜像副本。
+
+趣音机器码检查（使用本地原版/修改版组件，不随发布包提供）
+BASELINE: null singleton reproduces read fault at 0xEC; ready dispatch passes; 8 cases PASS
+MODIFIED: null singleton skips sound update; ready/next tick dispatch unchanged; 8 cases + 4 late-init transitions PASS; only Sound app changed
+ROLLBACK: null singleton reproduces read fault at 0xEC; ready dispatch passes; 8 cases PASS
+这里的 BASELINE PASS 表示成功复现原故障，不表示原版已修复。
+
 复现方式
 在仓库目录运行 tests/integration.py，依次选择 baseline、modified、rollback、negative。
 每次均需提供 --original 原始NAND --reference 已验证的修改版NAND
 --emulator 原始melonDS.exe；可用 --work 指定一个新的本地输出目录。
 这些输入不随仓库提供。modified 模式测试另一个有效个人资料的副本，
 但仍使用同一设备的原始镜像，不代表已经完成跨设备测试。
+
+升级与回滚测试：
+python tests/sound_upgrade.py --original ORIGINAL_NAND --previous V010_NAND --reference APPROVED_V011_NAND --work NEW_TEST_DIRECTORY
+测试会生成独立副本，拒绝复用已存在的测试目录。
 
 回滚检查生成另外的文件，与各自原始输入逐字节一致；修改版保留不变。
 模拟器回滚后恢复原版代码，触摸复位补丁也随之移除。
@@ -29,6 +48,12 @@ SHELL: executable ROLLBACK.sh restores original hash; PASS
 此前已在配套 Windows 测试环境中确认昵称/签名输入保存、菜单中文昵称、
 PictoChat 返回菜单后的触摸和按键。本次发布工具生成的目标组件与该版本一致。
 自动检查不等于重新完成所有界面测试，也不代表其他设备、Android 或真机已验证。
+
+趣音修复此前已在配套 Windows 测试环境中连续完成三次启动/返回，返回触摸正常。
+本次发布工具的趣音组件与该版本逐字节相同，没有重新声称完成整套界面测试。
+Android 选对 NAND 后已收到趣音可打开的确认；优化版 APK 的菜单帧率和声音也已确认正常。
+Android 完整重复启动序列、完整音频播放/录音、其他设备和真机仍未完成验证。
+SOURCE 一项沿用 v0.1.0 对未改动触摸补丁的检查；NAND/模拟器应用与回滚、趣音机器码检查均在 v0.1.1 重跑。
 
 发布内容
 仅包含组件差分、工具、输入法参考代码及文档。
